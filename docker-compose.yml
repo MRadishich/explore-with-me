@@ -7,7 +7,7 @@ services:
     ports:
       - "9090:9090"
     environment:
-      - STATS_SERVER_URL=http://localhost:9091
+      - STATS_SERVER_URL=http://stats-server:9091
 
   stats-server:
     build: statistics/stats-server
