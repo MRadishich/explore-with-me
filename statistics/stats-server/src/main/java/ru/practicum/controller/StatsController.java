@@ -9,8 +9,9 @@ import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.server.StatsServer;
 
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -35,8 +36,12 @@ public class StatsController {
             @RequestParam(required = false) String[] uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
-        LocalDateTime startDate = LocalDateTime.parse(URLDecoder.decode(start, Charset.defaultCharset()));
-        LocalDateTime endDate = LocalDateTime.parse(URLDecoder.decode(end, Charset.defaultCharset()));
+        LocalDateTime startDate = LocalDateTime.parse(
+                URLDecoder.decode(start, StandardCharsets.UTF_8),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime endDate = LocalDateTime.parse(
+                URLDecoder.decode(end, StandardCharsets.UTF_8),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         log.info("Request: get statistic. Param: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
         return statsServer.getStats(startDate, endDate, uris, unique);
     }
