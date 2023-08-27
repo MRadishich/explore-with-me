@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHitDto;
 
+import javax.validation.Valid;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -31,7 +32,7 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> saveHit(EndpointHitDto hitDto) {
+    public ResponseEntity<Object> saveHit(@Valid EndpointHitDto hitDto) {
         log.info("Send post request. EndpointHit: {}", hitDto);
 
         return post("/hit", hitDto);

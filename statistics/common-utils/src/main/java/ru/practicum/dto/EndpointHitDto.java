@@ -9,12 +9,13 @@ import java.time.LocalDateTime;
 
 @Data
 public class EndpointHitDto {
+
     private final Long id;
-    @NotBlank
 
+    @NotBlank
     private final String app;
-    @NotBlank
 
+    @NotBlank
     private final String uri;
 
     @NotBlank
