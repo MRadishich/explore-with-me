@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.exception.model.ErrorResponse;
 import ru.practicum.exception.model.NotFoundException;
 
@@ -44,6 +45,19 @@ public class ErrorHandler {
                 HttpStatus.BAD_REQUEST,
                 "Incorrectly made request.",
                 message,
+                LocalDateTime.now()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentTypeMismatchException ex) {
+        log.warn(ex.getMessage());
+
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Incorrectly made request.",
+                ex.getMessage(),
                 LocalDateTime.now()
         );
     }
