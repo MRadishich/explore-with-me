@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(int catId) {
         if (!categoryRepository.existsById(catId)) {
-            throw new NotFoundException("category with id =" + catId + "was not found.");
+            throw new NotFoundException("category with id =" + catId + " was not found.");
         }
 
         categoryRepository.deleteById(catId);
@@ -55,6 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryOutputDto> getCategories(int from, int size) {
         Page<Category> categories = categoryRepository.findAll(PageRequest.of(from, size));
 
@@ -64,6 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryOutputDto getCategory(int catId) {
         return categoryRepository.findById(catId)
                 .map(CategoryMapper::toDto)
