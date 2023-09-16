@@ -7,6 +7,7 @@ import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.entity.Compilation;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.request.repository.RequestRepository;
+import ru.practicum.stats.StatisticsService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CompilationMapper {
     private final RequestRepository requestRepository;
+    private final StatisticsService statisticsService;
 
     public CompilationDto toDto(Compilation compilation) {
         return new CompilationDto(
@@ -23,7 +25,10 @@ public class CompilationMapper {
                 compilation.getPinned(),
                 compilation.getEvents() == null ? List.of() :
                         compilation.getEvents().stream()
-                                .map(event -> EventMapper.toShortDto(event, requestRepository.countConfirmedRequests(event.getId())))
+                                .map(event -> EventMapper.toShortDto(
+                                        event,
+                                        requestRepository.countConfirmedRequests(event.getId()),
+                                        statisticsService.getViews(event)))
                                 .collect(Collectors.toList())
         );
     }

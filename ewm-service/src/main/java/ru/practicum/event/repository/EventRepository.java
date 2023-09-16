@@ -56,7 +56,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "LEFT JOIN E.requests AS PR " +
             "WHERE (coalesce(:text, null) is null or lower(E.annotation) like lower(CONCAT('%', :text, '%')) " +
             "or lower(E.description) like lower(CONCAT('%', :text, '%'))) " +
-            "AND (coalesce(:categoryIds, null) is null or E.category.id in (:categories)) " +
+            "AND (coalesce(:categories, null) is null or E.category.id in (:categories)) " +
             "AND (coalesce(:paid, null) is null or E.paid in :paid) " +
             "AND (coalesce(:rangeStart, null) is null or E.eventDate >= :rangeStart) " +
             "AND (coalesce(:rangeEnd, null) is null or E.eventDate <= :rangeEnd) " +

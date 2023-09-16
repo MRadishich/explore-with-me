@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.service.EventService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,13 +30,15 @@ public class EventPublicController {
                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                                   @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                                                  @RequestParam(required = false) String sort) {
-        return eventService.getAllByParamForPublic(from, size, text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort);
+                                                  @RequestParam(required = false) String sort,
+                                                  HttpServletRequest httpServletRequest) {
+        return eventService.getAllByParamForPublic(from, size, text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, httpServletRequest);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEventById(@PathVariable long id) {
-        return eventService.getEventById(id);
+    public EventFullDto getEventById(@PathVariable long id,
+                                     HttpServletRequest httpServletRequest) {
+        return eventService.getEventById(id, httpServletRequest);
     }
 }

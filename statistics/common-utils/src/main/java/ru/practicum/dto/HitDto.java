@@ -4,11 +4,11 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 
+
 @Data
-public class EndpointHitDto {
+public class HitDto {
 
     private final Long id;
 
@@ -21,7 +21,6 @@ public class EndpointHitDto {
     @NotBlank
     private final String ip;
 
-    @PastOrPresent
     @NotNull
     private final LocalDateTime timestamp;
 }

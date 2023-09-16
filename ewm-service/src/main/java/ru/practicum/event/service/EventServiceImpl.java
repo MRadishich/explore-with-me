@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,9 +26,11 @@ import ru.practicum.request.enums.RequestStatus;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.repository.RequestRepository;
+import ru.practicum.stats.StatisticsService;
 import ru.practicum.users.entity.User;
 import ru.practicum.users.repository.UserRepository;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -43,6 +46,10 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
     private final LocationRepository locationRepository;
+    private final StatisticsService statisticsService;
+
+    @Value("${app.name}")
+    private String app;
 
     @Override
     @Transactional
@@ -70,7 +77,10 @@ public class EventServiceImpl implements EventService {
 
         event = eventRepository.save(event);
 
-        return EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(event.getId()));
+        return EventMapper.toFullDto(
+                event,
+                requestRepository.countConfirmedRequests(event.getId()),
+                statisticsService.getViews(event));
     }
 
     private void updateLocation(Event event) {
@@ -90,9 +100,13 @@ public class EventServiceImpl implements EventService {
 
         return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from, size))
                 .stream()
-                .map(event -> EventMapper.toShortDto(event, requestRepository.countConfirmedRequests(event.getId())))
+                .map(event -> EventMapper.toShortDto(
+                        event,
+                        requestRepository.countConfirmedRequests(event.getId()),
+                        statisticsService.getViews(event)))
                 .collect(Collectors.toList());
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -107,7 +121,10 @@ public class EventServiceImpl implements EventService {
                 () -> new ForbiddenException("User with id=" + userId + " did not create event an with id=" + eventId + ".")
         );
 
-        return EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(event.getId()));
+        return EventMapper.toFullDto(
+                event,
+                requestRepository.countConfirmedRequests(event.getId()),
+                statisticsService.getViews(event));
     }
 
     @Override
@@ -148,7 +165,10 @@ public class EventServiceImpl implements EventService {
 
         event = eventRepository.save(event);
 
-        return EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(eventId));
+        return EventMapper.toFullDto(
+                event,
+                requestRepository.countConfirmedRequests(eventId),
+                statisticsService.getViews(event));
     }
 
     @Override
@@ -255,6 +275,7 @@ public class EventServiceImpl implements EventService {
             LocalDateTime rangeEnd,
             int from,
             int size) {
+        log.info("Get all events by parameters (admin).");
 
         Pageable page = PageRequest.of(from == 0 ? 0 : from / size, size);
 
@@ -264,13 +285,18 @@ public class EventServiceImpl implements EventService {
 
         return eventRepository.findAllByParamForAdmin(users, states, categories, rangeStart, rangeEnd, page)
                 .stream()
-                .map(event -> EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(event.getId())))
+                .map(event -> EventMapper.toFullDto(
+                        event,
+                        requestRepository.countConfirmedRequests(event.getId()),
+                        statisticsService.getViews(event)))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public EventFullDto adminUpdate(EventUpdateAdminDto eventUpdateAdminDto, Long eventId) {
+        log.info("Update event with id = " + eventId + " (admin).");
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id =" + eventId + " was not found."));
 
@@ -345,11 +371,25 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        return EventMapper.toFullDto(eventRepository.save(event), requestRepository.countConfirmedRequests(eventId));
+        return EventMapper.toFullDto(
+                eventRepository.save(event),
+                requestRepository.countConfirmedRequests(eventId),
+                statisticsService.getViews(event));
     }
 
     @Override
-    public List<EventFullDto> getAllByParamForPublic(int from, int size, String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort) {
+    public List<EventFullDto> getAllByParamForPublic(int from,
+                                                     int size,
+                                                     String text,
+                                                     List<Integer> categories,
+                                                     Boolean paid,
+                                                     LocalDateTime rangeStart,
+                                                     LocalDateTime rangeEnd,
+                                                     Boolean onlyAvailable,
+                                                     String sort,
+                                                     HttpServletRequest httpServletRequest) {
+        log.info("Get all events by parameters (public).");
+        statisticsService.sendHit(app, httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
 
         if (rangeStart != null && rangeEnd != null) {
             if (rangeStart.isAfter(rangeEnd)) {
@@ -363,21 +403,30 @@ public class EventServiceImpl implements EventService {
             if (sort.equals(SortType.EVENT_DATE.name())) {
                 return eventRepository.findAllByParamFroPublicWithSort(page, text, categories, paid, rangeStart, rangeEnd, onlyAvailable)
                         .stream()
-                        .map(event -> EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(event.getId())))
+                        .map(event -> EventMapper.toFullDto(
+                                event,
+                                requestRepository.countConfirmedRequests(event.getId()),
+                                statisticsService.getViews(event)))
                         .collect(Collectors.toList());
             }
         }
 
         return eventRepository.findAllByParamForPublic(page, text, categories, paid, rangeStart, rangeEnd, onlyAvailable)
                 .stream()
-                .map(event -> EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(event.getId())))
+                .map(event -> EventMapper.toFullDto(
+                        event,
+                        requestRepository.countConfirmedRequests(event.getId()),
+                        statisticsService.getViews(event)))
                 .sorted(Comparator.comparing(EventFullDto::getViews)
                         .reversed())
                 .collect(Collectors.toList());
     }
 
     @Override
-    public EventFullDto getEventById(Long eventId) {
+    public EventFullDto getEventById(Long eventId, HttpServletRequest httpServletRequest) {
+        log.info("Get all events by id = " + eventId);
+        statisticsService.sendHit(app, httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with eventId=" + eventId + " was not found."));
 
@@ -385,6 +434,9 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with id=" + eventId + " not available.");
         }
 
-        return EventMapper.toFullDto(event, requestRepository.countConfirmedRequests(eventId));
+        return EventMapper.toFullDto(
+                event,
+                requestRepository.countConfirmedRequests(eventId),
+                statisticsService.getViews(event));
     }
 }

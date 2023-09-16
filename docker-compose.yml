@@ -27,7 +27,8 @@ services:
       - POSTGRES_USER=postgres
 
   ewm-service:
-    image: amazoncorretto:11-alpine-jdk
+    build: ewm-service
+    image: ewm-service-image
     container_name: ewm-service
     ports:
       - "8080:8080"
@@ -35,9 +36,9 @@ services:
       - ewm-db
     environment:
       - STATS_SERVER_URL=http://stats-service:9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-service
-      - SPRING_DATASOURCE_USERNAME=ewm
-      - SPRING_DATASOURCE_PASSWORD=ewm
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
 
   ewm-db:
     image: postgres:14-alpine

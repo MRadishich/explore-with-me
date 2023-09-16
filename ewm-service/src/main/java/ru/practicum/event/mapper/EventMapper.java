@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @UtilityClass
 public class EventMapper {
-    public static EventFullDto toFullDto(Event event, Integer confirmedRequests) {
+    public static EventFullDto toFullDto(Event event, Integer confirmedRequests, Long views) {
         return new EventFullDto(
                 event.getId(),
                 event.getTitle(),
@@ -29,11 +29,11 @@ public class EventMapper {
                 event.getPublishedOn(),
                 event.getRequestModeration(),
                 event.getState(),
-                null
+                views
         );
     }
 
-    public static EventShortDto toShortDto(Event event, Integer confirmedRequests) {
+    public static EventShortDto toShortDto(Event event, Integer confirmedRequests, Long views) {
         return new EventShortDto(
                 event.getId(),
                 event.getAnnotation(),
@@ -44,7 +44,7 @@ public class EventMapper {
                 event.getEventDate(),
                 UserMapper.toShortDto(event.getInitiator()),
                 event.getPaid(),
-                null
+                views
         );
     }
 

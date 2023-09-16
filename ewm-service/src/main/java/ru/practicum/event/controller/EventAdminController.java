@@ -10,7 +10,6 @@ import ru.practicum.event.dto.EventUpdateAdminDto;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.service.EventService;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -24,7 +23,6 @@ import java.util.List;
 @Validated
 public class EventAdminController {
     private final EventService eventService;
-//    private final StatsClient statsClient;
 
     @GetMapping
     public List<EventFullDto> findAllByParam(@PositiveOrZero @RequestParam(defaultValue = "0") int from,
@@ -33,8 +31,7 @@ public class EventAdminController {
                                              @RequestParam(required = false) List<EventState> states,
                                              @RequestParam(required = false) List<Integer> categoryIds,
                                              @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-                                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                             HttpServletRequest request) {
+                                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd) {
 
         return eventService.getAllByParamForAdmin(userIds, states, categoryIds, rangeStart, rangeEnd, from, size);
     }

@@ -6,6 +6,7 @@ import ru.practicum.request.dto.RequestDto;
 import ru.practicum.request.dto.RequestResultDto;
 import ru.practicum.request.dto.RequestUpdateDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,7 +42,8 @@ public interface EventService {
                                               LocalDateTime rangeStart,
                                               LocalDateTime rangeEnd,
                                               Boolean onlyAvailable,
-                                              String sort);
+                                              String sort,
+                                              HttpServletRequest httpServletRequest);
 
-    EventFullDto getEventById(Long id);
+    EventFullDto getEventById(Long id, HttpServletRequest httpServletRequest);
 }
