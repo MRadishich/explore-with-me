@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.model.NotFoundException;
 import ru.practicum.users.dto.UserInputDto;
-import ru.practicum.users.dto.UserOutputDto;
+import ru.practicum.users.dto.UserFullDto;
 import ru.practicum.users.entity.User;
 import ru.practicum.users.mapper.UserMapper;
 import ru.practicum.users.repository.UserRepository;
@@ -23,26 +23,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserOutputDto createUser(UserInputDto userInputDto) {
+    public UserFullDto createUser(UserInputDto userInputDto) {
         User user = UserMapper.toUser(userInputDto);
         user = userRepository.save(user);
 
-        return UserMapper.toDto(user);
+        return UserMapper.toFullDto(user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserOutputDto> getUsers(List<Long> userIds, int from, int size) {
+    public List<UserFullDto> getUsers(List<Long> userIds, int from, int size) {
         if (userIds == null) {
             return userRepository.findAll(PageRequest.of(from, size))
                     .stream()
-                    .map(UserMapper::toDto)
+                    .map(UserMapper::toFullDto)
                     .collect(Collectors.toList());
         }
 
         return userRepository.findByIdIn(userIds, PageRequest.of(from, size))
                 .stream()
-                .map(UserMapper::toDto)
+                .map(UserMapper::toFullDto)
                 .collect(Collectors.toList());
     }
 
