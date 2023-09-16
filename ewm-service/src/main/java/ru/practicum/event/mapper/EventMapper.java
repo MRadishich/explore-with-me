@@ -1,8 +1,8 @@
 package ru.practicum.event.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventCreateDto;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.enums.EventState;
@@ -56,7 +56,7 @@ public class EventMapper {
                 .description(eventShortDto.getDescription())
                 .eventDate(eventShortDto.getEventDate())
                 .location(eventShortDto.getLocation())
-                .paid(eventShortDto.getPaid())
+                .paid(eventShortDto.getPaid() != null && eventShortDto.getPaid())
                 .participantLimit(eventShortDto.getParticipantLimit() == null ? 0L : eventShortDto.getParticipantLimit())
                 .requestModeration(eventShortDto.getRequestModeration() == null || eventShortDto.getRequestModeration())
                 .createdOn(LocalDateTime.now())

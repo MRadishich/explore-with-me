@@ -33,10 +33,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT E FROM Event AS E " +
             "LEFT JOIN E.requests AS PR " +
-            "WHERE (:text is null or lower(E.annotation) like lower(CONCAT('%', :text, '%')) " +
-            "or lower(E.description) like lower(CONCAT('%', :text, '%'))) " +
-            "AND (:categories is null or E.category.id in (:categories)) " +
-            "AND (:paid is null or E.paid in :paid) " +
+            "WHERE (coalesce(:text, null) is null or lower(E.annotation) like lower(CONCAT('%', :text, '%')) " +
+            "OR lower(E.description) like lower(CONCAT('%', :text, '%'))) " +
+            "AND (coalesce(:categories, null) is null or E.category.id in (:categories)) " +
+            "AND (coalesce(:paid, null) is null or E.paid in :paid) " +
             "AND (coalesce(:rangeStart, null) is null or E.eventDate >= :rangeStart) " +
             "AND (coalesce(:rangeEnd, null) is null or E.eventDate <= :rangeEnd) " +
             "AND (:onlyAvailable = FALSE or (E.participantLimit = 0 or E.requestModeration = FALSE " +
@@ -54,10 +54,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT E FROM Event AS E " +
             "LEFT JOIN E.requests AS PR " +
-            "WHERE (:text is null or lower(E.annotation) like lower(CONCAT('%', :text, '%')) " +
+            "WHERE (coalesce(:text, null) is null or lower(E.annotation) like lower(CONCAT('%', :text, '%')) " +
             "or lower(E.description) like lower(CONCAT('%', :text, '%'))) " +
-            "AND (:categories is null or E.category.id in (:categories)) " +
-            "AND (:paid is null or E.paid in :paid) " +
+            "AND (coalesce(:categoryIds, null) is null or E.category.id in (:categories)) " +
+            "AND (coalesce(:paid, null) is null or E.paid in :paid) " +
             "AND (coalesce(:rangeStart, null) is null or E.eventDate >= :rangeStart) " +
             "AND (coalesce(:rangeEnd, null) is null or E.eventDate <= :rangeEnd) " +
             "AND (:onlyAvailable = FALSE or (E.participantLimit = 0 or E.requestModeration = FALSE " +
