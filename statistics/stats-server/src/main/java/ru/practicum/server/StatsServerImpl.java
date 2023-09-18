@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.HitDto;
+import ru.practicum.dto.RequestHitDto;
 import ru.practicum.dto.ViewStatsDto;
 import ru.practicum.entity.EndpointHit;
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.mapper.StatsMapper;
 import ru.practicum.repository.StatsRepository;
 
@@ -21,7 +23,7 @@ public class StatsServerImpl implements StatsServer {
 
     @Override
     @Transactional
-    public EndpointHitDto save(EndpointHitDto hitDto) {
+    public HitDto save(RequestHitDto hitDto) {
         EndpointHit hit = StatsMapper.toEntity(hitDto);
         hit = statsRepository.save(hit);
 
@@ -32,6 +34,10 @@ public class StatsServerImpl implements StatsServer {
     @Transactional
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {
         List<ViewStatsDto> viewStats;
+
+        if (end.isBefore(start)) {
+            throw new BadRequestException("Start time should be before end time.");
+        }
 
         if (!unique && uris == null) {
             log.info("Find all hits. Param: start={}, end={}", start, end);

@@ -421,7 +421,7 @@
           {
             "description": "список id пользователей, чьи события нужно найти",
             "in": "query",
-            "name": "users",
+            "name": "userIds",
             "required": false,
             "schema": {
               "type": "array",
@@ -446,7 +446,7 @@
           {
             "description": "список id категорий в которых будет вестись поиск",
             "in": "query",
-            "name": "categories",
+            "name": "categoryIds",
             "required": false,
             "schema": {
               "type": "array",
