@@ -10,12 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.entity.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.dto.*;
+import ru.practicum.event.entity.Comment;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.entity.Location;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortType;
 import ru.practicum.event.enums.StateAction;
+import ru.practicum.event.mapper.CommentMapper;
 import ru.practicum.event.mapper.EventMapper;
+import ru.practicum.event.repository.CommentRepository;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.LocationRepository;
 import ru.practicum.exception.model.*;
@@ -47,6 +50,7 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final LocationRepository locationRepository;
     private final StatisticsService statisticsService;
+    private final CommentRepository commentRepository;
 
     @Value("${app.name}")
     private String app;
@@ -378,6 +382,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventFullDto> getAllByParamForPublic(int from,
                                                      int size,
                                                      String text,
@@ -423,6 +428,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EventFullDto getEventById(Long eventId, HttpServletRequest httpServletRequest) {
         log.info("Get all events by id = " + eventId);
         statisticsService.sendHit(app, httpServletRequest.getRequestURI(), httpServletRequest.getRemoteAddr());
@@ -438,5 +444,95 @@ public class EventServiceImpl implements EventService {
                 event,
                 requestRepository.countConfirmedRequests(eventId),
                 statisticsService.getViews(event));
+    }
+
+    @Override
+    @Transactional
+    public CommentFullDto createComment(CommentInputDto commentInputDto, Long userId, Long eventId) {
+        log.info("Create comment. User id = {}, event id = {}", userId, eventId);
+
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User with id=" + userId + " was not found.");
+        }
+
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("Event with eventId=" + eventId + " was not found.");
+        }
+
+        Comment comment = Comment.builder()
+                .eventId(eventId)
+                .userId(userId)
+                .createDate(LocalDateTime.now())
+                .text(commentInputDto.getText())
+                .build();
+
+        return CommentMapper.toFullDto(commentRepository.save(comment));
+    }
+
+    @Override
+    @Transactional
+    public CommentFullDto updateComment(CommentInputDto commentInputDto, Long commentId, Long userId) {
+        log.info("Update comment. Comment id = {}, user id = {}", commentId, userId);
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment with id=" + commentId + " was not found."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found."));
+
+        if (!Objects.equals(user.getId(), comment.getUserId())) {
+            throw new ConflictException("User with id=" + userId + " did not write a comment with id=" + commentId + ".");
+        }
+
+        comment.setText(commentInputDto.getText());
+        comment.setUpdateDate(LocalDateTime.now());
+
+        return CommentMapper.toFullDto(commentRepository.save(comment));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentShortDto> getCommentsByEventId(Long eventId) {
+        log.info("Get all comments. Event id = {}", eventId);
+
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("Event wih id=" + eventId + " was not found.");
+        }
+
+        List<Comment> comments = commentRepository.findAllByEventId(eventId);
+
+        return comments.stream()
+                .map(CommentMapper::toShortDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteCommentPrivate(Long commentId, Long userId) {
+        log.info("Delete comment (private). User id = {}, comment id = {}", userId, commentId);
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment with id=" + commentId + " was not found."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found."));
+
+        if (!Objects.equals(user.getId(), comment.getUserId())) {
+            throw new ConflictException("User with id=" + userId + " did not write a comment with id=" + comment + ".");
+        }
+
+        commentRepository.deleteById(commentId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCommentAdmin(Long commentId) {
+        log.info("Delete comment (admin). Comment id = {}", commentId);
+
+        if (!commentRepository.existsById(commentId)) {
+            throw new NotFoundException("Comment with id=" + commentId + " was not found.");
+        }
+
+        commentRepository.deleteById(commentId);
     }
 }
