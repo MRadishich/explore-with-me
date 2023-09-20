@@ -46,4 +46,14 @@ public interface EventService {
                                               HttpServletRequest httpServletRequest);
 
     EventFullDto getEventById(Long id, HttpServletRequest httpServletRequest);
+
+    CommentFullDto createComment(CommentInputDto commentInputDto, Long userId, Long eventId);
+
+    CommentFullDto updateComment(CommentInputDto commentInputDto, Long commentId, Long userId);
+
+    List<CommentShortDto> getCommentsByEventId(Long eventId);
+
+    void deleteCommentPrivate(Long commentId, Long userId);
+
+    void deleteCommentAdmin(Long commentId);
 }

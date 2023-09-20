@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.event.dto.CommentShortDto;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.service.EventService;
 
@@ -35,10 +36,16 @@ public class EventPublicController {
         return eventService.getAllByParamForPublic(from, size, text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, httpServletRequest);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEventById(@PathVariable long id,
+    public EventFullDto getEventById(@PathVariable long eventId,
                                      HttpServletRequest httpServletRequest) {
-        return eventService.getEventById(id, httpServletRequest);
+        return eventService.getEventById(eventId, httpServletRequest);
+    }
+
+    @GetMapping("/{eventId}/comments")
+    @ResponseStatus(HttpStatus.OK)
+    public List<CommentShortDto> getComments(@PathVariable long eventId) {
+        return eventService.getCommentsByEventId(eventId);
     }
 }
