@@ -1,4 +1,31 @@
 # java-explore-with-me
-Template repository for ExploreWithMe project.
-
 Pull: https://github.com/MRadishich/explore-with-me/pull/3
+
+## Описание фичи - комментарии
+У пользователей появилась возможность оставлять комментарии под определенным событиям. 
+
+### Описание публичной части API
+- Предоставляется возможность поиска комментариев определенного события.
+  ```
+  GET /events/{eventId}/comments
+  ```
+
+### Описание приватной части API
+- Предоставляется возможность оставить комментарий под событием. Длинна комментария должна быть не более 2 000 символов.
+  ```
+  POST /users/{userId}/events/{eventId}/comment
+  ```
+- Предоставляется возможность обновить комменатрий.
+  ```
+  PATCH /users/{userId}/events/comments/{commentId}
+  ```
+- Предоставляется возможность удалить комменатрий.
+  ```
+  DELETE /users/{userId}/events/comments/{commentId}
+  ```
+
+### Описание API для администратора
+- Предоставляется возможность удалить комменатрий.
+  ```
+  DELETE /admin/events/comments/{commentId}
+  ```
